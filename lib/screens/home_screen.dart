@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 import 'add_medication_screen.dart';
+import 'history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -43,8 +44,20 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('MediTrack'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HistoryScreen(),
+                ),
+              );
+            },
+          )
+        ],
       ),
-
       body: medications.isEmpty
           ? const Center(
               child: Text('No medications yet'),
@@ -53,11 +66,24 @@ class _HomeScreenState extends State<HomeScreen> {
               itemCount: medications.length,
               itemBuilder: (context, index) {
                 final med = medications[index];
-
-                return ListTile(
-                  title: Text(med['name']),
-                  subtitle: Text(med['dosage']),
-                  leading: const Icon(Icons.medication),
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: ListTile(
+                    leading: const Icon(Icons.medication),
+                    title: Text(med['name']),
+                    subtitle: Text(med['dosage']),
+                    trailing: ElevatedButton(
+                      onPressed: () async {
+                        await db.addLog(med['id']);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Marked as taken'),
+                          ),
+                        );
+                      },
+                      child: const Text('Taken'),
+                    ),
+                  ),
                 );
               },
             ),

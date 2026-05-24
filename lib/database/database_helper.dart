@@ -34,6 +34,13 @@ class DatabaseHelper {
         dosage TEXT NOT NULL
       )
     ''');
+    await db.execute('''
+      CREATE TABLE logs(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        medicationId INTEGER NOT NULL,
+        takenAt TEXT NOT NULL
+      )
+    ''');
   }
 
   Future<int> insertMedication(Map<String, dynamic> row) async {
@@ -46,6 +53,26 @@ class DatabaseHelper {
     final db = await instance.database;
 
     return await db.query('medications');
+  }
+
+  Future<int> addLog(int medicationId) async {
+    final db = await database;
+
+    return await db.insert('logs', {
+      'medicationId': medicationId,
+      'takenAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getLogs() async {
+  final db = await database;
+
+  return await db.rawQuery('''
+    SELECT logs.id, logs.takenAt, medications.name, medications.dosage
+    FROM logs
+    JOIN medications ON medications.id = logs.medicationId
+    ORDER BY logs.takenAt DESC
+  ''');
   }
 
 }
