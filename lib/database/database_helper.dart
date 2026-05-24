@@ -75,4 +75,14 @@ class DatabaseHelper {
   ''');
   }
 
+  Future<List<Map<String, dynamic>>> getTodayLogs() async {
+    final db = await database;
+
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+
+    return await db.rawQuery('''
+      SELECT * FROM logs
+      WHERE takenAt LIKE '$today%'
+    ''');
+  }
 }
